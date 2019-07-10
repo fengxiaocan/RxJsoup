@@ -28,6 +28,7 @@ dependencies {
     //来自 https://github.com/florent37/RxRetroJsoup
     implementation 'org.jsoup:jsoup:latest.release'
     implementation 'io.reactivex.rxjava2:rxjava:latest.release'
+    implementation 'io.reactivex.rxjava2:rxandroid:latest.release'
     implementation 'com.squareup.okhttp3:okhttp:latest.release'
 //    implementation 'org.jetbrains:annotations-java5:15.0'
 }
