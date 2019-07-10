@@ -1,5 +1,6 @@
 package com.app.rxjsoup;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -23,7 +24,6 @@ import okhttp3.Response;
 
 public class RxJsoup {
 
-    private static final String TAG = "RXJSOUP";
     private final String url;
     private Document document;
 
@@ -38,15 +38,6 @@ public class RxJsoup {
         this.okHttpClient = okHttpClient;
     }
 
-    //RxJsoup.connect(
-    //                  Jsoup.connect("www.gggggggg.fr")
-    //                      .userAgent(MY_USER_AGENT)
-    //                      .data("credential", email)
-    //                      .data("pwd", password)
-    //                      .cookies(loginForm.cookies())
-    //                      .method(Connection.Method.POST)
-    //
-    //                  ).subscibe( response -> {})
     public static Observable<Connection.Response> connect(final Connection jsoupConnection) {
         return Observable.create(new ObservableOnSubscribe<Connection.Response>() {
             @Override
@@ -60,6 +51,95 @@ public class RxJsoup {
                 }
             }
 
+        });
+    }
+
+    public static OkHttpClient okHttpClient() {
+        return new OkHttpClient();
+    }
+
+    public static Request.Builder request() {
+        return new Request.Builder();
+    }
+
+    public static OkHttpClient.Builder okHttpClientBuilder() {
+        return new OkHttpClient.Builder();
+    }
+
+    /**
+     * 请求
+     *
+     * @param request
+     * @return
+     */
+    public static Observable<Response> request(final Request request) {
+        return Observable.create(new ObservableOnSubscribe<Response>() {
+            @Override
+            public void subscribe(ObservableEmitter<Response> observableEmitter) throws Exception
+            {
+                try {
+                    Response execute = okHttpClient().newCall(request).execute();
+                    observableEmitter.onNext(execute);
+                    observableEmitter.onComplete();
+                } catch (Exception e) {
+                    observableEmitter.onError(e);
+                }
+            }
+        });
+    }
+
+    public static Observable<Response> request(final Request request, final OkHttpClient client) {
+        return Observable.create(new ObservableOnSubscribe<Response>() {
+            @Override
+            public void subscribe(ObservableEmitter<Response> observableEmitter) throws Exception
+            {
+                try {
+                    Response execute = client.newCall(request).execute();
+                    observableEmitter.onNext(execute);
+                    observableEmitter.onComplete();
+                } catch (Exception e) {
+                    observableEmitter.onError(e);
+                }
+            }
+        });
+    }
+
+    public static Observable<Document> requestDocument(final Request request) {
+        return Observable.create(new ObservableOnSubscribe<Document>() {
+            @Override
+            public void subscribe(ObservableEmitter<Document> observableEmitter) throws Exception
+            {
+                try {
+                    Response execute = okHttpClient().newCall(request).execute();
+                    Document document = Jsoup.parse(execute.body().string());
+                    observableEmitter.onNext(document);
+                    observableEmitter.onComplete();
+                } catch (Exception e) {
+                    observableEmitter.onError(e);
+                }
+            }
+        });
+    }
+
+    public static Observable<Element> requestElement(final Request request,
+            @NotNull final String expression)
+    {
+        return Observable.create(new ObservableOnSubscribe<Element>() {
+            @Override
+            public void subscribe(ObservableEmitter<Element> observableEmitter) throws Exception
+            {
+                try {
+                    Response execute = okHttpClient().newCall(request).execute();
+                    Document document = Jsoup.parse(execute.body().string());
+                    final Elements elements = document.select(expression);
+                    for (Element elem : elements) {
+                        observableEmitter.onNext(elem);
+                    }
+                    observableEmitter.onComplete();
+                } catch (Exception e) {
+                    observableEmitter.onError(e);
+                }
+            }
         });
     }
 
